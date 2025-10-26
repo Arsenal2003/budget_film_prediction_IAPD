@@ -64,6 +64,18 @@ def scrape_movie_details(url):
     if popularity_div:
         popularity = popularity_div.get_text(strip=True)
 
+    # Budget
+    budget = "N/A"
+    budget_tag = soup.select_one('li[data-testid="title-boxoffice-budget"] span.ipc-metadata-list-item__list-content-item')
+    if budget_tag:
+        budget = budget_tag.get_text(strip=True)
+
+    # Gross worldwide
+    gross_worldwide = "N/A"
+    gross_tag = soup.select_one('li[data-testid="title-boxoffice-cumulativeworldwidegross"] span.ipc-metadata-list-item__list-content-item')
+    if gross_tag:
+        gross_worldwide = gross_tag.get_text(strip=True)
+
     return {
         "Title": title,
         "Rating": rating,
@@ -73,6 +85,8 @@ def scrape_movie_details(url):
         "Stars": stars,
         "Genres": genres,
         "Popularity": popularity,
+        "Budget": budget,
+        "Gross Worldwide": gross_worldwide,
         "URL": url
     }
 
@@ -81,7 +95,7 @@ def main():
     print(f"[INFO] Am găsit {len(movie_links)} filme.")
     
     with open("top250_movies.csv", "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["Title", "Rating", "Runtime", "Directors", "Writers", "Stars", "Genres", "Popularity", "URL"])
+        writer = csv.DictWriter(f, fieldnames=["Title", "Rating", "Runtime", "Directors", "Writers", "Stars", "Genres", "Popularity", "Budget", "Gross Worldwide", "URL"])
         writer.writeheader()
 
         for i, link in enumerate(movie_links, 1):
