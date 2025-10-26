@@ -38,8 +38,8 @@ def scrape_movie_details(url):
         directors = ', '.join(a.get_text(strip=True) for a in people_section[0].select('a'))
     if len(people_section) >= 2:
         writers = ', '.join(a.get_text(strip=True) for a in people_section[1].select('a'))
-    if len(people_section) >= 3:
-        stars = ', '.join(a.get_text(strip=True) for a in people_section[2].select('a'))
+    
+    stars = ', '.join([tag.text.strip() for tag in soup.select('a[data-testid="title-cast-item__actor"]')][:10])
 
     # Popularitate
     popularity = "N/A"
@@ -81,12 +81,12 @@ def main():
 
     print(f"[INFO] Se procesează {len(movie_links)} filme.")
 
-    with open("imdb_movies_data.csv", "w", newline="", encoding="utf-8") as f:
+    with open("imdb_movies_data_rev.csv", "w", newline="", encoding="utf-8") as f:
         fieldnames = ["Title", "Rating", "Runtime", "Directors", "Writers", "Stars", "Genres", "Popularity", "Budget", "Gross Worldwide", "URL"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
 
-        for i, link in enumerate(movie_links, 1):
+        for i, link in enumerate(reversed(movie_links)):
             print(f"[{i}/{len(movie_links)}] Se procesează: {link}")
             try:
                 data = scrape_movie_details(link)
