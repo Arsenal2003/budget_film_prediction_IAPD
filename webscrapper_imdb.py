@@ -38,8 +38,8 @@ def scrape_movie_details(url):
         directors = ', '.join(a.get_text(strip=True) for a in people_section[0].select('a'))
     if len(people_section) >= 2:
         writers = ', '.join(a.get_text(strip=True) for a in people_section[1].select('a'))
-    if len(people_section) >= 3:
-        stars = ', '.join(a.get_text(strip=True) for a in people_section[2].select('a'))
+    
+    stars = ', '.join([tag.text.strip() for tag in soup.select('a[data-testid="title-cast-item__actor"]')][:10])
 
     # Popularitate
     popularity = "N/A"
@@ -86,14 +86,14 @@ def main():
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
 
-        for i, link in enumerate(movie_links, 1):
+        for i, link in enumerate(movie_links):
             print(f"[{i}/{len(movie_links)}] Se procesează: {link}")
             try:
                 data = scrape_movie_details(link)
                 writer.writerow(data)
             except Exception as e:
                 print(f"Eroare la {link}: {e}")
-            time.sleep(1)  # mic delay pentru a evita blocarea IMDb
+            # time.sleep(0.5)  # mic delay pentru a evita blocarea IMDb
 
     print("\n Gata! Datele sunt salvate în 'top250_movies.csv'.")
 
