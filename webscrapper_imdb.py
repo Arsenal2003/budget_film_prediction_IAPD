@@ -58,6 +58,12 @@ def scrape_movie_details(url):
     if len(people_section) >= 3:
         stars = ', '.join(a.get_text(strip=True) for a in people_section[2].select('a'))
 
+    # Top/Popularitate
+    popularity = "N/A"
+    popularity_div = soup.select_one('div[data-testid="hero-rating-bar__popularity__score"]')
+    if popularity_div:
+        popularity = popularity_div.get_text(strip=True)
+
     return {
         "Title": title,
         "Rating": rating,
@@ -66,6 +72,7 @@ def scrape_movie_details(url):
         "Writers": writers,
         "Stars": stars,
         "Genres": genres,
+        "Popularity": popularity,
         "URL": url
     }
 
@@ -74,7 +81,7 @@ def main():
     print(f"[INFO] Am găsit {len(movie_links)} filme.")
     
     with open("top250_movies.csv", "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["Title", "Rating", "Runtime", "Directors", "Writers", "Stars", "Genres", "URL"])
+        writer = csv.DictWriter(f, fieldnames=["Title", "Rating", "Runtime", "Directors", "Writers", "Stars", "Genres", "Popularity", "URL"])
         writer.writeheader()
 
         for i, link in enumerate(movie_links, 1):
