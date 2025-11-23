@@ -165,7 +165,21 @@ def clean_money_column(value):
     # ----------------------------------------
     return number * CURRENCY_TO_USD[currency]
 
-
+def clean_list_column(col_values, keyword_to_remove):
+    cleaned_list = []
+    for val in col_values:
+        if pd.isna(val):
+            cleaned_list.append(np.nan)
+            continue
+        # split după virgulă
+        items = [x.strip() for x in val.split(",")]
+        # eliminăm keyword și elemente goale
+        items = [x for x in items if x not in keyword_to_remove and x != ""]
+        if items:
+            cleaned_list.append(", ".join(items))
+        else:
+            cleaned_list.append(np.nan)
+    return cleaned_list
 
 def clean_and_fill(input_file, output_file):
     # Load data
@@ -194,6 +208,16 @@ def clean_and_fill(input_file, output_file):
 
     df = df.drop(columns=["Budget_cleaned", "Gross_cleaned"])
 
+    list_columns = {
+        "Directors": ["Directors"],
+        "Writers": ["Writers"],
+        "Stars": ["Stars"],
+        "Genres": ["Genres"]
+    }
+
+    for col, keywords in list_columns.items():
+        if col in df.columns:
+            df[col] = clean_list_column(df[col], keywords)
     # ------------------------------
     # 2. Fill missing values with mode
     # ------------------------------
