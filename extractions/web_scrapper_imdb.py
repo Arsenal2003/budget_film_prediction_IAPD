@@ -51,16 +51,16 @@ gross = gross_tag.find("div", class_="ipc-metadata-list-item__content-container"
 cast = [tag.text.strip() for tag in soup.select('a[data-testid="title-cast-item__actor"]')][:5]
 
 # Print all extracted info
-print("\n🎬 Title:", title)
-print("⭐ Rating:", rating)
-print("⏱️ Runtime:", runtime)
-print("🎥 Directors:", directors)
-print("✍️ Writers:", writers)
-print("🌟 Stars:", stars)
-print("🎭 Genres:", genres)
-print("💵 Budget:", budget)
-print("🌍 Gross:", gross)
-print("👥 Cast:", cast)
+print("\n Title:", title)
+print(" Rating:", rating)
+print("⏱ Runtime:", runtime)
+print(" Directors:", directors)
+print(" Writers:", writers)
+print(" Stars:", stars)
+print(" Genres:", genres)
+print(" Budget:", budget)
+print(" Gross:", gross)
+print(" Cast:", cast)
 
 # Dictionary form
 movie_data = {
@@ -76,5 +76,5 @@ movie_data = {
     "Cast": cast,
 }
 
-print("\n✅ Movie data extracted successfully!")
+print("\n Movie data extracted successfully!")
 print(movie_data)

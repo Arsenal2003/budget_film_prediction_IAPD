@@ -28,21 +28,21 @@ def extract_imdb_list(list_url, output_file="imdb_titles.csv"):
 
     while True:
         url = f"{list_url}?mode=detail&page={page}"
-        print(f"\n📄 Fetching page {page}: {url}")
+        print(f"\nFetching page {page}: {url}")
 
         response = requests.get(url, headers=headers)
         if response.status_code == 404:
-            print("❌ Page not found (404) — stopping.")
+            print("Page not found (404) — stopping.")
             break
         elif response.status_code != 200:
-            print(f"⚠️ HTTP {response.status_code}")
+            print(f"HTTP {response.status_code}")
             break
 
         soup = BeautifulSoup(response.text, "html.parser")
         items = soup.select(".lister-item, .ipc-metadata-list-summary-item")
 
         if not items:
-            print("✅ No more movies found.")
+            print("No more movies found.")
             break
 
         new_movies = []
@@ -61,15 +61,15 @@ def extract_imdb_list(list_url, output_file="imdb_titles.csv"):
             with open(output_file, "a", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerows(new_movies)
-            print(f"✅ Page {page}: Added {len(new_movies)} titles (Total: {len(all_links)})")
+            print(f"Page {page}: Added {len(new_movies)} titles (Total: {len(all_links)})")
         else:
-            print("ℹ️ No new titles this page — stopping.")
+            print("ℹNo new titles this page — stopping.")
             break
 
         page += 1
         time.sleep(1)
 
-    print(f"\n💾 Done! {len(all_links)} total titles saved to '{output_file}'.")
+    print(f"\nDone! {len(all_links)} total titles saved to '{output_file}'.")
 
 
 if __name__ == "__main__":
