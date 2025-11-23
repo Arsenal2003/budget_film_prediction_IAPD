@@ -95,75 +95,90 @@ CURRENCY_REGEX = re.compile(
     flags=re.IGNORECASE
 )
 
+def extract_currency_prefix(v):
+    v = v.strip()
+
+    prefix = ""
+    for ch in v:
+        if ch.isdigit():
+            break
+        if ch not in [" ", "\u00A0", "\u2009", "\u202F"]:  # remove weird spaces
+            prefix += ch
+
+    return prefix.strip()
+
+
 def clean_money_column(value):
     if pd.isna(value):
         return np.nan
+    return value
+    # # v = str(value).strip()
+    # # v = v.replace("\u00A0", " ").replace("\u2009", " ").replace("\u202F", " ")
+    # # v = re.sub(r"\s+", " ", v)
 
-    v = str(value).strip()
+    
+    # # # scoatem parantezele (estimate), etc
+    # # v = re.sub(r"\(.*?\)", "", v).strip()
 
-    # scoatem parantezele (estimate), etc
-    v = re.sub(r"\(.*?\)", "", v).strip()
+    # # # ----------------------------------------
+    # # # 1. detectăm valuta exact din dicționar
+    # # # ----------------------------------------
+    
+    # # m = CURRENCY_REGEX.match(v)
+    # # if not m:
+    # #     return np.nan
+    # # # print(m)
+    # # currency = m.group(1)
 
-    # ----------------------------------------
-    # 1. detectăm valuta exact din dicționar
-    # ----------------------------------------
-    m = CURRENCY_REGEX.match(v)
-    if not m:
-        return np.nan
+    # # # normalizare (atenție: simbolurile rămân exact cum sunt)
+    # # # currency = currency.upper()
 
-    currency = m.group(1)
+    # # # corectăm forme alternative
+    # # # replacements = {
+    # # # 
+    # # # }
+    # # # currency = replacements.get(currency, currency)
+    # # currency = extract_currency_prefix(v)
+    # # print(currency)
+    # # if currency not in CURRENCY_TO_USD:
+    # #     return np.nan
 
-    # normalizare (atenție: simbolurile rămân exact cum sunt)
-    currency = currency.upper()
+    # # # ----------------------------------------
+    # # # 2. extragem numărul (perfect tolerant)
+    # # # ----------------------------------------
+    # # number_match = re.search(r"[\d.,]+", v)
+    # # # print(number_match)
+    # # if not number_match:
+    # #     return np.nan
 
-    # corectăm forme alternative
-    replacements = {
-        "US$": "USD",
-        "CA$": "CA$",
-        "AU$": "A$",
-        "NZ$": "NZ$",
-        "HK$": "HK$"
-    }
-    currency = replacements.get(currency, currency)
+    # # n = number_match.group(0)
+    # # # print(n)
+    # # # normalizare universală
+    # # # dacă apare atât punct cât și virgulă -> european
+    # # if "," in n and "." in n:
+    # #     n = n.replace(".", "").replace(",", ".")
+    # # # doar virgulă, multe -> separator mii
+    # # elif n.count(",") > 1:
+    # #     n = n.replace(",", "")
+    # # # doar punct, multe -> separator mii
+    # # elif n.count(".") > 1:
+    # #     n = n.replace(".", "")
+    # # # doar virgula și pare thousand → elimini
+    # # elif "," in n and len(n.split(",")[-1]) == 3:
+    # #     n = n.replace(",", "")
+    # # # doar virgula dar nu thousand -> decimal
+    # # else:
+    # #     n = n.replace(",", "")
+    # # print(n)
+    # # try:
+    # #     number = float(n)
+    # # except:
+    # #     return n
 
-    if currency not in CURRENCY_TO_USD:
-        return np.nan
-
-    # ----------------------------------------
-    # 2. extragem numărul (perfect tolerant)
-    # ----------------------------------------
-    number_match = re.search(r"[\d.,]+", v)
-    if not number_match:
-        return np.nan
-
-    n = number_match.group(0)
-
-    # normalizare universală
-    # dacă apare atât punct cât și virgulă -> european
-    if "," in n and "." in n:
-        n = n.replace(".", "").replace(",", ".")
-    # doar virgulă, multe -> separator mii
-    elif n.count(",") > 1:
-        n = n.replace(",", "")
-    # doar punct, multe -> separator mii
-    elif n.count(".") > 1:
-        n = n.replace(".", "")
-    # doar virgula și pare thousand → elimini
-    elif "," in n and len(n.split(",")[-1]) == 3:
-        n = n.replace(",", "")
-    # doar virgula dar nu thousand -> decimal
-    else:
-        n = n.replace(",", "")
-
-    try:
-        number = float(n)
-    except:
-        return np.nan
-
-    # ----------------------------------------
-    # 3. convertește în USD
-    # ----------------------------------------
-    return number * CURRENCY_TO_USD[currency]
+    # # ----------------------------------------
+    # # 3. convertește în USD
+    # # ----------------------------------------
+    # return number * CURRENCY_TO_USD[currency]
 
 
 
@@ -188,11 +203,15 @@ def clean_and_fill(input_file, output_file):
     df["Budget_cleaned"] = df["Budget"].apply(clean_money_column)
     df["Gross_cleaned"] = df["Gross Worldwide"].apply(clean_money_column)
 
+    # Remove rows where cleaning failed
+    df = df.dropna(subset=["Budget_cleaned", "Gross_cleaned"])
+
     # Replace original columns
     df["Budget"] = df["Budget_cleaned"]
     df["Gross Worldwide"] = df["Gross_cleaned"]
 
-    df = df.drop(columns=["Budget_cleaned", "Gross_cleaned"])
+    df = df.drop(columns=["Budget_cleaned"])
+    df = df.drop(columns=["Gross_cleaned"])
 
     # ------------------------------
     # 2. Fill missing values with mode
@@ -215,3 +234,8 @@ clean_and_fill(
     "../data/result_data_movies.csv",
     "../data/movies_cleaned_final.csv"
 )
+
+import pandas as pd
+df = pd.read_csv("../data/movies_cleaned_final.csv")
+print(len(df))
+# print(df.columns)
