@@ -53,7 +53,7 @@ cast = [tag.text.strip() for tag in soup.select('a[data-testid="title-cast-item_
 # Print all extracted info
 print("\n Title:", title)
 print(" Rating:", rating)
-print("⏱ Runtime:", runtime)
+print(" Runtime:", runtime)
 print(" Directors:", directors)
 print(" Writers:", writers)
 print(" Stars:", stars)
