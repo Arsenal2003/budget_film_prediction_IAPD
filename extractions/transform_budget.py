@@ -188,9 +188,6 @@ def clean_and_fill(input_file, output_file):
     df["Budget_cleaned"] = df["Budget"].apply(clean_money_column)
     df["Gross_cleaned"] = df["Gross Worldwide"].apply(clean_money_column)
 
-    # Remove rows where cleaning failed
-    df = df.dropna(subset=["Budget_cleaned", "Gross_cleaned"])
-
     # Replace original columns
     df["Budget"] = df["Budget_cleaned"]
     df["Gross Worldwide"] = df["Gross_cleaned"]
